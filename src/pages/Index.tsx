@@ -6,6 +6,16 @@ import StepWorkflow from "@/components/StepWorkflow";
 import { User, Activity } from "lucide-react";
 import { Pill, FlaskConical, TrendingUp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface Patient {
   id: string;
@@ -60,7 +70,11 @@ export interface DrugAdministration {
   administrationTime?: number; // 경구 등 투약시간(분)
 }
 
-const Index = () => {
+interface IndexProps {
+  onLogout: () => void;
+}
+
+const Index = ({ onLogout }: IndexProps) => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [bloodTests, setBloodTests] = useState<BloodTest[]>([]);
@@ -110,10 +124,47 @@ const Index = () => {
                 <p className="text-sm text-slate-600 dark:text-slate-300">등록된 환자 수: {patients.length}</p>
                 <p className="text-sm text-slate-600 dark:text-slate-300">선택된 환자: {selectedPatient?.name || "None"}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-600 dark:text-slate-300">{isDark ? "다크모드" : "라이트모드"}</span>
-                <Switch checked={isDark} onCheckedChange={setIsDark} />
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={`https://avatar.vercel.sh/user.png`} alt="User" />
+                      <AvatarFallback>사용자</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">사용자</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">사용자</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        user@pk-friends.com
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground pt-1">
+                        소속: PK 프렌즈 대학병원
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <div className="flex items-center justify-between w-full">
+                      <span>{isDark ? "다크 모드" : "라이트 모드"}</span>
+                      <Switch
+                        checked={isDark}
+                        onCheckedChange={setIsDark}
+                        className="ml-4"
+                      />
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    프로필 설정
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onLogout}>
+                    로그아웃
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
