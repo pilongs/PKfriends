@@ -30,7 +30,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/PKfriends/">
           <Routes>
             <Route path="/" element={<Index onLogout={handleLogout} />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
