@@ -115,8 +115,8 @@ const Index = ({ onLogout }: IndexProps) => {
             <div className="flex items-center space-x-3">
               <Activity className="h-8 w-8 text-blue-600 dark:text-blue-300" />
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">PK Friends</h1>
-                <p className="text-sm text-slate-600 dark:text-slate-300">No 1. 약동학 분석 시스템</p>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">TDM Friends</h1>
+                <p className="text-sm text-slate-600 dark:text-slate-300">Precision Medicine의 시작</p>
               </div>
             </div>
             <div className="flex items-center gap-6">
@@ -172,12 +172,12 @@ const Index = ({ onLogout }: IndexProps) => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="workflow" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-white shadow-sm">
-            <TabsTrigger value="workflow" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-4 bg-white shadow-sm items-stretch">
+            <TabsTrigger value="workflow" className="flex items-center justify-center col-span-3 rounded-l-xl px-6 py-3 h-full">
               <Activity className="h-4 w-4" />
-              시뮬레이션
+              Let's TDM
             </TabsTrigger>
-            <TabsTrigger value="management" className="flex items-center gap-2">
+            <TabsTrigger value="management" className="flex items-center justify-center col-span-1 rounded-r-xl px-6 py-3 h-full">
               <User className="h-4 w-4" />
               환자 관리
             </TabsTrigger>

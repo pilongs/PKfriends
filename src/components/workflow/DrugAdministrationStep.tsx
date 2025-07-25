@@ -146,7 +146,7 @@ const DrugAdministrationStep = ({
             <ArrowLeft className="h-4 w-4" />
             Lab
           </Button>
-          {patientDrugAdministrations.length > 0 && <Button type="button" onClick={onNext} className="flex items-center gap-2">
+          {patientDrugAdministrations.length > 0 && <Button type="button" onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black text-white font-bold text-lg py-3 px-6 justify-center">
             PK Simulation
             <ArrowRight className="h-4 w-4" />
           </Button>}

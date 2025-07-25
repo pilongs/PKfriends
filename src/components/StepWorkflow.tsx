@@ -42,7 +42,7 @@ const StepWorkflow = ({
     { id: 2, title: "TDM 약물정보", icon: Pill, description: "TDM 약물 정보를 입력합니다." },
     { id: 3, title: "Lab", icon: FlaskConical, description: "신기능 및 혈중 약물 농도 정보를 입력합니다." },
     { id: 4, title: "투약 기록", icon: History, description: "투약 기록을 입력합니다." },
-    { id: 5, title: "PK Simulation", icon: Activity, description: "약동학 시뮬레이션 결과를 확인해주세요." }
+    { id: 5, title: "Let's TDM", icon: Activity, description: "정밀의료 시뮬레이션 결과를 확인해보세요." }
   ];
 
   const patientPrescriptions = selectedPatient 
@@ -91,7 +91,7 @@ const StepWorkflow = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            PK 분석 워크플로우
+            TDM 분석 워크플로우
           </CardTitle>
           <CardDescription>
             각 단계를 순서대로 진행해 주세요

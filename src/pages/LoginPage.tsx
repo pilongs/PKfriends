@@ -45,14 +45,14 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
       <div className="flex flex-1 items-center justify-center">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">PK Friends</CardTitle>
-            <CardDescription>No 1. 약동학 분석 시스템</CardDescription>
+            <CardTitle className="text-2xl font-bold">TDM Friends</CardTitle>
+            <CardDescription>Precision Medicine의 시작</CardDescription>
           </CardHeader>
           <CardContent>
             {view === 'login' && (
               <div className="space-y-4">
                 <div className="text-center text-sm text-muted-foreground space-y-1">
-                  <p>PK Friends는 초대 기반으로 운영하고 있습니다.</p>
+                  <p>TDM Friends는 초대 기반으로 운영하고 있습니다.</p>
                   <p>사용에 관심있으신 분은 contact@pkfriend.co.kr로 문의주세요.</p>
                 </div>
                 <Button onClick={handleLogin} className="w-full flex items-center gap-2">

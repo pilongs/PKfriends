@@ -132,6 +132,48 @@ const PrescriptionStep = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Existing Prescriptions */}
+          {patientPrescriptions.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>TDM 약물정보 ({patientPrescriptions.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>약물명</TableHead>
+                        <TableHead>적응증</TableHead>
+                        <TableHead>TDM 목표</TableHead>
+                        <TableHead>TDM 목표치</TableHead>
+                        <TableHead>삭제</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {currentPrescription && (
+                        <TableRow key={currentPrescription.id}>
+                          <TableCell className="font-medium">{currentPrescription.drugName}</TableCell>
+                          <TableCell>{currentPrescription.indication || "-"}</TableCell>
+                          <TableCell>{currentPrescription.tdmTarget || "-"}</TableCell>
+                          <TableCell>{currentPrescription.tdmTargetValue || "-"}</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon" onClick={() => handleDelete(currentPrescription.id)}>
+                              <span className="sr-only">삭제</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Add Prescription Form */}
           <Card>
             <CardHeader>
@@ -185,48 +227,6 @@ const PrescriptionStep = ({
             </CardContent>
           </Card>
 
-          {/* Existing Prescriptions */}
-          {patientPrescriptions.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>TDM 약물정보 ({patientPrescriptions.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>약물명</TableHead>
-                        <TableHead>적응증</TableHead>
-                        <TableHead>TDM 목표</TableHead>
-                        <TableHead>TDM 목표치</TableHead>
-                        <TableHead>삭제</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {currentPrescription && (
-                        <TableRow key={currentPrescription.id}>
-                          <TableCell className="font-medium">{currentPrescription.drugName}</TableCell>
-                          <TableCell>{currentPrescription.indication || "-"}</TableCell>
-                          <TableCell>{currentPrescription.tdmTarget || "-"}</TableCell>
-                          <TableCell>{currentPrescription.tdmTargetValue || "-"}</TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(currentPrescription.id)}>
-                              <span className="sr-only">삭제</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Navigation */}
           <div className="flex justify-between">
             <Button variant="outline" onClick={onPrev} className="flex items-center gap-2">
@@ -234,7 +234,7 @@ const PrescriptionStep = ({
               환자 등록 및 선택
             </Button>
             {isCompleted && (
-              <Button onClick={onNext} className="flex items-center gap-2">
+              <Button onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black text-white font-bold text-lg py-3 px-6 justify-center">
                 Lab
                 <ArrowRight className="h-4 w-4" />
               </Button>

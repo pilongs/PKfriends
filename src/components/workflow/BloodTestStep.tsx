@@ -233,7 +233,7 @@ const BloodTestStep = ({
               TDM 약물정보
             </Button>
             {isCompleted && (
-              <Button onClick={onNext} className="flex items-center gap-2">
+              <Button onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black text-white font-bold text-lg py-3 px-6 justify-center">
                 투약 기록
                 <ArrowRight className="h-4 w-4" />
               </Button>

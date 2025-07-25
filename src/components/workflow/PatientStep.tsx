@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Patient } from "@/pages/Index";
 import { User, UserPlus, ArrowRight, CheckCircle } from "lucide-react";
 import dayjs from "dayjs";
@@ -35,6 +35,7 @@ const PatientStep = ({
     height: "",
     gender: ""
   });
+  const [search, setSearch] = useState("");
 
   const handleNewPatientSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +93,13 @@ const PatientStep = ({
     return Math.sqrt((w * h) / 3600).toFixed(2);
   };
 
+  // 검색어로 환자 필터링
+  const filteredPatients = patients.filter(
+    (p) =>
+      p.name.includes(search) ||
+      (p.id && p.id.includes(search))
+  );
+
   return (
     <div className="space-y-6">
       {/* Step 1: Patient Selection */}
@@ -110,26 +118,59 @@ const PatientStep = ({
           {/* Existing Patients */}
           {patients.length > 0 && (
             <div className="space-y-4">
-              <Label htmlFor="patientSelect">기존 환자 선택</Label>
-              <Select
-                value={selectedPatient?.id || ""}
-                onValueChange={(value) => {
-                  const patient = patients.find(p => p.id === value);
-                  setSelectedPatient(patient || null);
-                  setShowNewPatientForm(false);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="환자 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {patients.map((patient) => (
-                    <SelectItem key={patient.id} value={patient.id}>
-                      {patient.name} (나이: {patient.age}, {patient.weight}kg)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="patientSearch">이름 또는 번호로 검색</Label>
+              <Input
+                id="patientSearch"
+                placeholder="이름 또는 환자번호 입력"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="mb-2"
+              />
+              <Label>기존 환자 리스트</Label>
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>이름</TableHead>
+                      <TableHead>환자번호</TableHead>
+                      <TableHead>나이</TableHead>
+                      <TableHead>성별</TableHead>
+                      <TableHead>체중(kg)</TableHead>
+                      <TableHead>신장(cm)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPatients.length > 0 ? (
+                      filteredPatients.map((patient) => (
+                        <TableRow
+                          key={patient.id}
+                          className={
+                            selectedPatient?.id === patient.id
+                              ? "bg-blue-100 cursor-pointer"
+                              : "hover:bg-muted/50 cursor-pointer"
+                          }
+                          onClick={() => {
+                            setSelectedPatient(patient);
+                            setShowNewPatientForm(false);
+                          }}
+                          data-state={selectedPatient?.id === patient.id ? "selected" : undefined}
+                        >
+                          <TableCell>{patient.name}</TableCell>
+                          <TableCell>{patient.id}</TableCell>
+                          <TableCell>{patient.age}</TableCell>
+                          <TableCell>{patient.gender === "male" ? "남" : patient.gender === "female" ? "여" : "-"}</TableCell>
+                          <TableCell>{patient.weight}</TableCell>
+                          <TableCell>{patient.height}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground">검색 결과가 없습니다.</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
 
@@ -231,20 +272,18 @@ const PatientStep = ({
                     </div>
                     <div className="md:col-span-2">
                       <Label htmlFor="gender">성별 *</Label>
-                      <Select
+                      <select
+                        id="gender"
                         value={newPatientData.gender}
-                        onValueChange={(value) => setNewPatientData({...newPatientData, gender: value})}
+                        onChange={(e) => setNewPatientData({...newPatientData, gender: e.target.value})}
                         required
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="성별 선택" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="male">남성</SelectItem>
-                          <SelectItem value="female">여성</SelectItem>
-                          <SelectItem value="other">기타</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="">성별 선택</option>
+                        <option value="male">남성</option>
+                        <option value="female">여성</option>
+                        <option value="other">기타</option>
+                      </select>
                     </div>
                     <div>
                       <Label>BMI</Label>
@@ -316,7 +355,7 @@ const PatientStep = ({
           {/* Next Button */}
           {isCompleted && (
             <div className="flex justify-end">
-              <Button onClick={onNext} className="flex items-center gap-2">
+              <Button onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black text-white font-bold text-lg py-3 px-6 justify-center">
                 TDM 약물정보
                 <ArrowRight className="h-4 w-4" />
               </Button>
