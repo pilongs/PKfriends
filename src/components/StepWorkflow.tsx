@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Patient, Prescription, BloodTest } from "@/pages/Index";
+import { Patient, Prescription, BloodTest, DrugAdministration } from "@/pages/Index";
 import { CheckCircle, Circle, User, Pill, FlaskConical, Activity, History } from "lucide-react";
 import PatientStep from "./workflow/PatientStep";
 import PrescriptionStep from "./workflow/PrescriptionStep";
@@ -21,6 +21,7 @@ interface StepWorkflowProps {
   onAddBloodTest: (bloodTest: BloodTest) => void;
   onAddDrugAdministration: (drugAdministration: DrugAdministration) => void;
   drugAdministrations: DrugAdministration[];
+  setDrugAdministrations: (drugAdministrations: DrugAdministration[]) => void;
 }
 
 const StepWorkflow = ({
@@ -33,7 +34,8 @@ const StepWorkflow = ({
   onAddPrescription,
   onAddBloodTest,
   onAddDrugAdministration,
-  drugAdministrations
+  drugAdministrations,
+  setDrugAdministrations
 }: StepWorkflowProps) => {
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -70,7 +72,7 @@ const StepWorkflow = ({
   };
 
   const handleNextStep = () => {
-    if (currentStep < 5 && isStepCompleted(currentStep)) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -186,6 +188,7 @@ const StepWorkflow = ({
             prescriptions={prescriptions}
             selectedPatient={selectedPatient}
             onAddDrugAdministration={onAddDrugAdministration}
+            setDrugAdministrations={setDrugAdministrations}
             drugAdministrations={drugAdministrations}
             onNext={handleNextStep}
             onPrev={handlePrevStep}

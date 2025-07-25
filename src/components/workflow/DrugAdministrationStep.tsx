@@ -6,12 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Patient, Prescription, DrugAdministration } from "@/pages/Index";
 import dayjs from "dayjs";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import TablePage from "./table_maker.jsx";
+import "./table_maker.css";
 
 interface DrugAdministrationStepProps {
   patients: Patient[];
   prescriptions: Prescription[];
   selectedPatient: Patient | null;
   onAddDrugAdministration: (drugAdministration: DrugAdministration) => void;
+  setDrugAdministrations: (records: any[]) => void;
   drugAdministrations: DrugAdministration[];
   onNext: () => void;
   onPrev: () => void;
@@ -23,6 +26,7 @@ const DrugAdministrationStep = ({
   prescriptions,
   selectedPatient,
   onAddDrugAdministration,
+  setDrugAdministrations,
   drugAdministrations,
   onNext,
   onPrev,
@@ -39,6 +43,7 @@ const DrugAdministrationStep = ({
     unit: "mg",
     infusionTime: undefined
   });
+  const [tableReady, setTableReady] = useState(false);
 
   // 약물명은 상단에 텍스트로만 표시, 선택 불가
   // 날짜 오늘 이후 선택 불가
@@ -79,77 +84,53 @@ const DrugAdministrationStep = ({
   const patientDrugAdministrations = drugAdministrations.filter(d => d.patientId === selectedPatient?.id);
 
   return (
-    <Card>
+    <Card className="bg-white dark:bg-slate-900 border dark:border-slate-700 text-slate-900 dark:text-slate-200">
       <CardHeader>
         <CardTitle>TDM 약물 투약력 입력</CardTitle>
         <CardDescription>2단계에서 입력한 TDM 약물에 대해 7반감기 이내의 투약력을 입력하세요.</CardDescription>
+        <div className="py-2 px-3 rounded bg-muted dark:bg-slate-800 text-base font-semibold mt-4">
+          약물명: {tdmDrug?.drugName || "-"}
+        </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label>약물명</label>
-            <div className="py-2 px-3 rounded bg-muted text-base font-semibold">{tdmDrug?.drugName || "-"}</div>
-          </div>
-          <div>
-            <label>투여 경로</label>
-            <Select value={form.route} onValueChange={v => handleChange("route", v)} required>
-              <SelectTrigger><SelectValue placeholder="경로 선택" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="IV">정맥주사(IV)</SelectItem>
-                <SelectItem value="PO">경구(PO)</SelectItem>
-                <SelectItem value="IM">근육주사(IM)</SelectItem>
-                <SelectItem value="SC">피하주사(SC)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label>날짜</label>
-            <Input type="date" value={form.date} max={today} onChange={e => handleChange("date", e.target.value)} required />
-          </div>
-          <div>
-            <label>시간</label>
-            <Input type="time" value={form.time} onChange={e => handleChange("time", e.target.value)} required />
-          </div>
-          <div>
-            <label>용량</label>
-            <Input type="number" value={form.dose} onChange={e => handleChange("dose", e.target.value)} required />
-            <Select value={form.unit} onValueChange={v => handleChange("unit", v)} required>
-              <SelectTrigger><SelectValue placeholder="단위 선택" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mg">mg</SelectItem>
-                <SelectItem value="g">g</SelectItem>
-                <SelectItem value="mcg">mcg</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {/* IV infusion 체크박스/투약시간 입력란 삭제, 대신 IV일 때만 주입시간 노출 */}
-          {form.route === "IV" && (
-            <div>
-              <label>주입 시간(분)</label>
-              <Input type="number" value={form.infusionTime || ""} onChange={e => handleChange("infusionTime", e.target.value)} required={form.route === "IV"} />
-            </div>
-          )}
-          <Button type="submit">추가</Button>
-        </form>
-        <div className="mt-8">
-          <h4 className="font-bold mb-2">입력된 투약력</h4>
-          <ul className="space-y-2">
-            {patientDrugAdministrations.map((adm, idx) => (
-              <li key={idx} className="border p-2 rounded">
-                {adm.drugName} / {adm.route} / {adm.date} {adm.time} / {adm.dose}{adm.unit} {adm.route === "IV" && adm.infusionTime ? `(주입: ${adm.infusionTime}분)` : null}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* table_maker 테이블/입력 UI */}
+        <TablePage
+          tdmDrug={tdmDrug}
+          onComplete={onNext}
+          onTableGenerated={() => setTableReady(true)}
+          onSaveRecords={(records) => {
+            // records를 DrugAdministration 타입으로 변환하여 setDrugAdministrations에 전달
+            if (selectedPatient && tdmDrug) {
+              const mapped = records.map((row, idx) => ({
+                id: `${Date.now()}_${idx}`,
+                patientId: selectedPatient.id,
+                drugName: tdmDrug.drugName,
+                route: row.route,
+                date: row.timeStr.split(" ")[0],
+                time: row.timeStr.split(" ")[1],
+                dose: Number(row.amount.split(" ")[0]),
+                unit: row.amount.split(" ")[1] || "mg",
+                isIVInfusion: row.route === "정맥",
+                infusionTime: row.injectionTime && row.injectionTime !== "-" ? Number(row.injectionTime) : undefined,
+                administrationTime: undefined
+              }));
+              // drugAdministrations를 완전히 대체
+              // (필요시 기존 데이터와 합칠 수도 있음)
+              // setDrugAdministrations([...drugAdministrations, ...mapped]);
+              // 완전히 대체하는 방식:
+              setDrugAdministrations(mapped);
+            }
+          }}
+        />
         <div className="flex justify-between mt-6">
-          <Button variant="outline" type="button" onClick={onPrev} className="flex items-center gap-2">
+          <Button variant="outline" type="button" onClick={onPrev} className="flex items-center gap-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200">
             <ArrowLeft className="h-4 w-4" />
             Lab
           </Button>
-          {patientDrugAdministrations.length > 0 && <Button type="button" onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black text-white font-bold text-lg py-3 px-6 justify-center">
-            PK Simulation
+          <Button type="button" onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black dark:bg-blue-700 text-white font-bold text-lg py-3 px-6 justify-center dark:hover:bg-blue-800">
+            TDM Simulation
             <ArrowRight className="h-4 w-4" />
-          </Button>}
+          </Button>
         </div>
       </CardContent>
     </Card>

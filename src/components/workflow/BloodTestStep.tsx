@@ -67,9 +67,30 @@ const BloodTestStep = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPatient) return;
-    if (!formData.testDate || !formData.testTime || !formData.concentration) return;
-    // 날짜+시간을 Date로 합침
-    const testDateTime = new Date(`${formData.testDate}T${formData.testTime}`);
+    if (!formData.testDate || !formData.concentration) return;
+    // 날짜/시간 파싱 (YYYY-MM-DD HH:mm 또는 YYYYMMDDHHmm)
+    let datePart = "";
+    let timePart = "";
+    let input = formData.testDate.trim();
+    if (/^\d{8}\d{4}$/.test(input.replace(/[-: ]/g, ""))) {
+      // 202507251400
+      datePart = input.slice(0, 8);
+      timePart = input.slice(8, 12);
+      datePart = datePart.slice(0,4) + '-' + datePart.slice(4,6) + '-' + datePart.slice(6,8);
+      timePart = timePart.slice(0,2) + ':' + timePart.slice(2,4);
+    } else if (/^\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}$/.test(input)) {
+      // 2025-07-25 14:00
+      [datePart, timePart] = input.split(/ +/);
+    } else {
+      alert("날짜와 시간 형식이 올바르지 않습니다. 예: 2025-07-25 14:00 또는 202507251400");
+      return;
+    }
+    // 오늘 이후 날짜 입력 방지
+    if (datePart > today) {
+      alert("날짜는 오늘 이후로 입력할 수 없습니다.");
+      return;
+    }
+    const testDateTime = new Date(`${datePart}T${timePart}`);
     const newBloodTest: BloodTest = {
       id: Date.now().toString(),
       patientId: selectedPatient.id,
@@ -168,22 +189,14 @@ const BloodTestStep = ({
             <CardContent>
               <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 items-center">
                 <div>
-                  <Label htmlFor="drugDate">날짜</Label>
+                  <Label htmlFor="drugDateTime">날짜/시간</Label>
                   <Input
-                    id="drugDate"
-                    type="date"
+                    id="drugDateTime"
+                    type="text"
                     value={formData.testDate}
-                    max={today}
+                    placeholder="예: 2025-07-25 14:00 또는 202507251400"
                     onChange={e => setFormData({ ...formData, testDate: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="drugTime">시간</Label>
-                  <Input
-                    id="drugTime"
-                    type="time"
-                    value={formData.testTime}
-                    onChange={e => setFormData({ ...formData, testTime: e.target.value })}
+                    max={today + ' 23:59'}
                   />
                 </div>
                 <div>

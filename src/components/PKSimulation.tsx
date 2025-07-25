@@ -28,6 +28,7 @@ const PKSimulation = ({ patients, prescriptions, bloodTests, selectedPatient }: 
   const [showSimulation, setShowSimulation] = useState(false);
   const simulationRef = useRef<HTMLDivElement>(null);
   const [doseAdjust, setDoseAdjust] = useState("");
+  const [doseUnit, setDoseUnit] = useState("mg");
   const [intervalAdjust, setIntervalAdjust] = useState("");
   const [tab, setTab] = useState("current");
 
@@ -176,8 +177,27 @@ const PKSimulation = ({ patients, prescriptions, bloodTests, selectedPatient }: 
           <TabsContent value="dose">
             <div className="mb-2 font-semibold">2. 용량 조정</div>
             <div className="flex gap-2 items-center mb-2">
-              <span>용량 (mg):</span>
-              <input type="number" className="border rounded px-2 py-1 w-24" value={doseAdjust || simulationParams.dose} onChange={e => setDoseAdjust(e.target.value)} />
+              <span>용량:</span>
+              <select
+                className="border rounded px-2 py-1 w-24"
+                value={doseAdjust || simulationParams.dose.split(' ')[0]}
+                onChange={e => setDoseAdjust(e.target.value + ' ' + doseUnit)}
+              >
+                {[50, 100, 200, 250, 500, 1000].map(val => (
+                  <option key={val} value={val}>{val}</option>
+                ))}
+              </select>
+              <select
+                className="border rounded px-2 py-1 w-16"
+                value={doseUnit}
+                onChange={e => {
+                  setDoseUnit(e.target.value);
+                  setDoseAdjust((doseAdjust || simulationParams.dose.split(' ')[0]) + ' ' + e.target.value);
+                }}
+              >
+                <option value="mg">mg</option>
+                <option value="정">정</option>
+              </select>
               <button className="ml-2 px-3 py-1 bg-blue-600 text-white rounded" onClick={() => setSimulationParams({ ...simulationParams, dose: doseAdjust || simulationParams.dose })}>그래프 출력</button>
             </div>
             <div className="w-full max-w-5xl mx-auto">
@@ -194,7 +214,15 @@ const PKSimulation = ({ patients, prescriptions, bloodTests, selectedPatient }: 
             <div className="mb-2 font-semibold">3. 투여 간격 조정</div>
             <div className="flex gap-2 items-center mb-2">
               <span>투여 간격 (half-life, h):</span>
-              <input type="number" className="border rounded px-2 py-1 w-24" value={intervalAdjust || simulationParams.halfLife} onChange={e => setIntervalAdjust(e.target.value)} />
+              <select
+                className="border rounded px-2 py-1 w-24"
+                value={intervalAdjust || simulationParams.halfLife}
+                onChange={e => setIntervalAdjust(e.target.value)}
+              >
+                {[1,2,3,6,8,12,24,48].map(val => (
+                  <option key={val} value={val}>{val}</option>
+                ))}
+              </select>
               <button className="ml-2 px-3 py-1 bg-blue-600 text-white rounded" onClick={() => setSimulationParams({ ...simulationParams, halfLife: intervalAdjust || simulationParams.halfLife })}>그래프 출력</button>
             </div>
             <div className="w-full max-w-5xl mx-auto">
