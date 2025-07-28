@@ -61,10 +61,10 @@ function TablePage(props) {
   const addOrUpdateCondition = () => {
     // 필수 필드 검증
     if (!currentCondition.firstDoseDate) {
-      alert("날짜와 시간을 입력해주세요! (예: 2025-07-25 14:00 또는 202507251400)");
+      alert("날짜와 시간을 입력해주세요! (예: 202507251400)");
       return;
     }
-    // 입력값 파싱 (YYYY-MM-DD HH:mm 또는 YYYYMMDDHHmm)
+    // 입력값 파싱 (YYYYMMDDHHmm 형식만 지원)
     let datePart = "";
     let timePart = "";
     let input = currentCondition.firstDoseDate.trim();
@@ -74,11 +74,8 @@ function TablePage(props) {
       timePart = input.slice(8, 12);
       datePart = datePart.slice(0,4) + '-' + datePart.slice(4,6) + '-' + datePart.slice(6,8);
       timePart = timePart.slice(0,2) + ':' + timePart.slice(2,4);
-    } else if (/^\d{4}-\d{2}-\d{2} ?\d{2}:\d{2}$/.test(input)) {
-      // 2025-07-25 14:00
-      [datePart, timePart] = input.split(/ +/);
     } else {
-      alert("날짜와 시간 형식이 올바르지 않습니다. 예: 2025-07-25 14:00 또는 202507251400");
+      alert("날짜와 시간 형식이 올바르지 않습니다. 예: 202507251400");
       return;
     }
     // 오늘 이후 날짜 입력 방지
@@ -141,6 +138,11 @@ function TablePage(props) {
   const startEditCondition = (conditionId) => {
     const conditionToEdit = conditions.find(c => c.id === conditionId);
     if (conditionToEdit) {
+      // 날짜와 시간을 합쳐서 표시 (YYYYMMDDHHmm 형식)
+      const dateStr = conditionToEdit.firstDoseDate.replace(/-/g, '');
+      const timeStr = conditionToEdit.firstDoseTime.replace(/:/g, '');
+      const combinedDateTime = dateStr + timeStr;
+      
       // 조건 입력창에 해당 조건 로드
       setCurrentCondition({
         route: conditionToEdit.route,
@@ -148,7 +150,7 @@ function TablePage(props) {
         unit: conditionToEdit.unit,
         intervalHours: conditionToEdit.intervalHours,
         injectionTime: conditionToEdit.injectionTime,
-        firstDoseDate: conditionToEdit.firstDoseDate,
+        firstDoseDate: combinedDateTime,
         firstDoseTime: conditionToEdit.firstDoseTime,
         totalDoses: conditionToEdit.totalDoses
       });
@@ -522,7 +524,7 @@ function TablePage(props) {
                     type="text"
                     value={currentCondition.firstDoseDate}
                     onChange={e => handleCurrentConditionChange("firstDoseDate", e.target.value)}
-                    placeholder="예: 2025-07-25 14:00"
+                    placeholder="예: 202507251400"
                     style={{
                       width: "100%",
                       padding: "8px 12px",
@@ -587,7 +589,10 @@ function TablePage(props) {
                   onMouseOver={e => { e.target.style.backgroundColor = "#dbeafe"; }}
                   onMouseOut={e => { e.target.style.backgroundColor = "#eaf0fd"; }}
                 >
-                  <span style={{ fontSize: 20, marginRight: 6, fontWeight: 600, background: "transparent" }}>+</span> 조건 추가
+                  <span style={{ fontSize: 20, marginRight: 6, fontWeight: 600, background: "transparent" }}>
+                    {isEditMode ? "✓" : "+"}
+                  </span>
+                  {isEditMode ? "조건 수정" : "조건 추가"}
                 </button>
               </div>
             </div>

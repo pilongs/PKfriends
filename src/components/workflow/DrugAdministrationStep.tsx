@@ -99,26 +99,28 @@ const DrugAdministrationStep = ({
           onComplete={onNext}
           onTableGenerated={() => setTableReady(true)}
           onSaveRecords={(records) => {
-            // records를 DrugAdministration 타입으로 변환하여 setDrugAdministrations에 전달
+            // records를 DrugAdministration 타입으로 변환하여 onAddDrugAdministration으로 추가
             if (selectedPatient && tdmDrug) {
-              const mapped = records.map((row, idx) => ({
-                id: `${Date.now()}_${idx}`,
-                patientId: selectedPatient.id,
-                drugName: tdmDrug.drugName,
-                route: row.route,
-                date: row.timeStr.split(" ")[0],
-                time: row.timeStr.split(" ")[1],
-                dose: Number(row.amount.split(" ")[0]),
-                unit: row.amount.split(" ")[1] || "mg",
-                isIVInfusion: row.route === "정맥",
-                infusionTime: row.injectionTime && row.injectionTime !== "-" ? Number(row.injectionTime) : undefined,
-                administrationTime: undefined
-              }));
-              // drugAdministrations를 완전히 대체
-              // (필요시 기존 데이터와 합칠 수도 있음)
-              // setDrugAdministrations([...drugAdministrations, ...mapped]);
-              // 완전히 대체하는 방식:
-              setDrugAdministrations(mapped);
+              // 기존 투약 기록을 모두 삭제 (같은 환자의 기존 기록)
+              const filteredAdministrations = drugAdministrations.filter(d => d.patientId !== selectedPatient.id);
+              
+              // 새로운 레코드들을 개별적으로 추가
+              records.forEach((row, idx) => {
+                const newDrugAdministration = {
+                  id: `${Date.now()}_${idx}`,
+                  patientId: selectedPatient.id,
+                  drugName: tdmDrug.drugName,
+                  route: row.route,
+                  date: row.timeStr.split(" ")[0],
+                  time: row.timeStr.split(" ")[1],
+                  dose: Number(row.amount.split(" ")[0]),
+                  unit: row.amount.split(" ")[1] || "mg",
+                  isIVInfusion: row.route === "정맥",
+                  infusionTime: row.injectionTime && row.injectionTime !== "-" ? Number(row.injectionTime) : undefined,
+                  administrationTime: undefined
+                };
+                onAddDrugAdministration(newDrugAdministration);
+              });
             }
           }}
         />
