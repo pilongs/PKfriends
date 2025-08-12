@@ -3,9 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Patient } from "@/pages/Index";
 import { User, UserPlus, ArrowRight, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import dayjs from "dayjs";
 
 interface PatientStepProps {
@@ -25,7 +28,7 @@ const PatientStep = ({
   onNext,
   isCompleted
 }: PatientStepProps) => {
-  const [showNewPatientForm, setShowNewPatientForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPatientData, setNewPatientData] = useState({
     patientNo: "",
     name: "",
@@ -33,7 +36,9 @@ const PatientStep = ({
     age: "",
     weight: "",
     height: "",
-    gender: ""
+    gender: "",
+    medicalHistory: "",
+    allergies: ""
   });
   const [search, setSearch] = useState("");
 
@@ -47,14 +52,14 @@ const PatientStep = ({
       weight: parseFloat(newPatientData.weight),
       height: parseFloat(newPatientData.height),
       gender: newPatientData.gender,
-      medicalHistory: "",
-      allergies: "",
+      medicalHistory: newPatientData.medicalHistory,
+      allergies: newPatientData.allergies,
       createdAt: newPatientData.birth ? new Date(newPatientData.birth) : new Date()
     };
 
     onAddPatient(newPatient);
     setSelectedPatient(newPatient);
-    setShowNewPatientForm(false);
+    setIsModalOpen(false);
     setNewPatientData({
       patientNo: "",
       name: "",
@@ -62,7 +67,9 @@ const PatientStep = ({
       age: "",
       weight: "",
       height: "",
-      gender: ""
+      gender: "",
+      medicalHistory: "",
+      allergies: ""
     });
   };
 
@@ -99,6 +106,22 @@ const PatientStep = ({
       p.name.includes(search) ||
       (p.id && p.id.includes(search))
   );
+
+  const openNewPatientModal = () => {
+    setSelectedPatient(null);
+    setNewPatientData({
+      patientNo: "",
+      name: "",
+      birth: "",
+      age: "",
+      weight: "",
+      height: "",
+      gender: "",
+      medicalHistory: "",
+      allergies: ""
+    });
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -151,7 +174,6 @@ const PatientStep = ({
                           }
                           onClick={() => {
                             setSelectedPatient(patient);
-                            setShowNewPatientForm(false);
                           }}
                           data-state={selectedPatient?.id === patient.id ? "selected" : undefined}
                         >
@@ -179,26 +201,28 @@ const PatientStep = ({
             <p className="text-sm text-muted-foreground mb-4">
               {patients.length > 0 ? "또는 신규 환자 등록" : "첫 환자를 등록하세요"}
             </p>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowNewPatientForm(true);
-                setSelectedPatient(null);
-              }}
-              className="w-full max-w-md"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              신규 환자 등록
-            </Button>
-          </div>
-
-          {/* New Patient Form */}
-          {showNewPatientForm && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>신규 환자 등록</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  onClick={openNewPatientModal}
+                  className="w-full max-w-md"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  신규 환자 등록
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <UserPlus className="h-5 w-5" />
+                    신규 환자 등록
+                  </DialogTitle>
+                  <DialogDescription>
+                    환자 정보를 입력해 등록하세요
+                  </DialogDescription>
+                </DialogHeader>
+                
                 <form onSubmit={handleNewPatientSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -222,6 +246,23 @@ const PatientStep = ({
                       />
                     </div>
                     <div>
+                      <Label htmlFor="gender">성별 *</Label>
+                      <Select
+                        value={newPatientData.gender}
+                        onValueChange={(value) => setNewPatientData({...newPatientData, gender: value})}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="성별 선택" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">남성</SelectItem>
+                          <SelectItem value="female">여성</SelectItem>
+                          <SelectItem value="other">기타</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
                       <Label htmlFor="birth">생년월일 *</Label>
                       <Input
                         id="birth"
@@ -239,15 +280,6 @@ const PatientStep = ({
                       />
                     </div>
                     <div>
-                      <Label htmlFor="age">나이</Label>
-                      <Input
-                        id="age"
-                        value={newPatientData.age}
-                        readOnly
-                        placeholder="생년월일 입력 시 자동 계산"
-                      />
-                    </div>
-                    <div>
                       <Label htmlFor="weight">체중(kg) *</Label>
                       <Input
                         id="weight"
@@ -256,6 +288,7 @@ const PatientStep = ({
                         value={newPatientData.weight}
                         onChange={(e) => setNewPatientData({...newPatientData, weight: e.target.value})}
                         placeholder="체중(kg)"
+                        min="0"
                         required
                       />
                     </div>
@@ -267,23 +300,18 @@ const PatientStep = ({
                         value={newPatientData.height}
                         onChange={(e) => setNewPatientData({...newPatientData, height: e.target.value})}
                         placeholder="신장(cm)"
+                        min="0"
                         required
                       />
                     </div>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="gender">성별 *</Label>
-                      <select
-                        id="gender"
-                        value={newPatientData.gender}
-                        onChange={(e) => setNewPatientData({...newPatientData, gender: e.target.value})}
-                        required
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="">성별 선택</option>
-                        <option value="male">남성</option>
-                        <option value="female">여성</option>
-                        <option value="other">기타</option>
-                      </select>
+                    <div>
+                      <Label htmlFor="age">나이</Label>
+                      <Input
+                        id="age"
+                        value={newPatientData.age}
+                        readOnly
+                        placeholder="생년월일 입력 시 자동 계산"
+                      />
                     </div>
                     <div>
                       <Label>BMI</Label>
@@ -294,22 +322,25 @@ const PatientStep = ({
                       <Input value={calcBSA()} readOnly placeholder="자동 계산" />
                     </div>
                   </div>
-                  <div className="flex gap-2">
+
+
+
+                  <div className="flex gap-2 pt-4">
                     <Button type="submit" className="flex-1">
                       등록 및 선택
                     </Button>
                     <Button 
                       type="button" 
                       variant="outline" 
-                      onClick={() => setShowNewPatientForm(false)}
+                      onClick={() => setIsModalOpen(false)}
                     >
                       취소
                     </Button>
                   </div>
                 </form>
-              </CardContent>
-            </Card>
-          )}
+              </DialogContent>
+            </Dialog>
+          </div>
 
           {/* Selected Patient Info */}
           {selectedPatient && (
@@ -324,8 +355,16 @@ const PatientStep = ({
                     <p className="text-sm">{selectedPatient.name}</p>
                   </div>
                   <div>
+                    <Label className="text-sm font-medium text-muted-foreground">생년월일</Label>
+                    <p className="text-sm">{selectedPatient.createdAt.toLocaleDateString()}</p>
+                  </div>
+                  <div>
                     <Label className="text-sm font-medium text-muted-foreground">나이</Label>
                     <p className="text-sm">{selectedPatient.age}세</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">성별</Label>
+                    <p className="text-sm">{selectedPatient.gender === "male" ? "남성" : selectedPatient.gender === "female" ? "여성" : "기타"}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">체중</Label>

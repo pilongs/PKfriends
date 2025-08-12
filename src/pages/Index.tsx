@@ -172,19 +172,19 @@ const Index = ({ onLogout }: IndexProps) => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="workflow" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-sm items-stretch">
+          <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-slate-800 border dark:border-slate-700 shadow-sm h-[52px]">
             <TabsTrigger
               value="workflow"
-              className="flex items-center justify-center col-span-3 rounded-l-xl px-6 py-3 h-full text-slate-900 dark:text-slate-200 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-white dark:data-[state=inactive]:bg-slate-800 dark:data-[state=inactive]:text-slate-400 dark:focus:bg-slate-700 dark:focus:text-white dark:hover:bg-slate-700 dark:hover:text-white border-r border-slate-200 dark:border-slate-700"
+              className="flex items-center justify-center col-span-3 rounded-l-xl px-6 h-[52px] min-h-[52px] max-h-[52px] text-slate-900 dark:text-slate-200 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-white dark:data-[state=inactive]:bg-slate-800 dark:data-[state=inactive]:text-slate-400 dark:focus:bg-slate-700 dark:focus:text-white dark:hover:bg-slate-700 dark:hover:text-white border-r border-slate-200 dark:border-slate-700 leading-none"
             >
-              <Activity className="h-4 w-4" />
+              <Activity className="h-4 w-4 mr-2" />
               Let's TDM
             </TabsTrigger>
             <TabsTrigger
               value="management"
-              className="flex items-center justify-center col-span-1 rounded-r-xl px-6 py-3 h-full text-slate-900 dark:text-slate-200 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-white dark:data-[state=inactive]:bg-slate-800 dark:data-[state=inactive]:text-slate-400 dark:focus:bg-slate-700 dark:focus:text-white dark:hover:bg-slate-700 dark:hover:text-white border-l border-slate-200 dark:border-slate-700"
+              className="flex items-center justify-center col-span-1 rounded-r-xl px-6 h-[52px] min-h-[52px] max-h-[52px] text-slate-900 dark:text-slate-200 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-white dark:data-[state=inactive]:bg-slate-800 dark:data-[state=inactive]:text-slate-400 dark:focus:bg-slate-700 dark:focus:text-white dark:hover:bg-slate-700 dark:hover:text-white border-l border-slate-200 dark:border-slate-700 leading-none"
             >
-              <User className="h-4 w-4" />
+              <User className="h-4 w-4 mr-2" />
               환자 관리
             </TabsTrigger>
           </TabsList>
@@ -201,6 +201,7 @@ const Index = ({ onLogout }: IndexProps) => {
               onAddBloodTest={addBloodTest}
               onAddDrugAdministration={addDrugAdministration}
               drugAdministrations={drugAdministrations}
+              setDrugAdministrations={setDrugAdministrations}
             />
           </TabsContent>
 
