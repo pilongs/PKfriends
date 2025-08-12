@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Patient, Prescription, DrugAdministration } from "@/pages/Index";
 import dayjs from "dayjs";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, History, CheckCircle } from "lucide-react";
 import TablePage from "./table_maker.jsx";
 import "./table_maker.css";
 
@@ -84,58 +84,74 @@ const DrugAdministrationStep = ({
   const patientDrugAdministrations = drugAdministrations.filter(d => d.patientId === selectedPatient?.id);
 
   return (
-    <Card className="bg-white dark:bg-slate-900 border dark:border-slate-700 text-slate-900 dark:text-slate-200">
-      <CardHeader>
-        <CardTitle>TDM 약물 투약력 입력</CardTitle>
-        <CardDescription>2단계에서 입력한 TDM 약물에 대해 7반감기 이내의 투약력을 입력하세요.</CardDescription>
-        <div className="py-2 px-3 rounded bg-muted dark:bg-slate-800 text-base font-semibold mt-4">
-          약물명: {tdmDrug?.drugName || "-"}
-        </div>
-      </CardHeader>
-      <CardContent>
-        {/* table_maker 테이블/입력 UI */}
-        <TablePage
-          tdmDrug={tdmDrug}
-          onComplete={onNext}
-          onTableGenerated={() => setTableReady(true)}
-          onSaveRecords={(records) => {
-            // records를 DrugAdministration 타입으로 변환하여 onAddDrugAdministration으로 추가
-            if (selectedPatient && tdmDrug) {
-              // 기존 투약 기록을 모두 삭제 (같은 환자의 기존 기록)
-              const filteredAdministrations = drugAdministrations.filter(d => d.patientId !== selectedPatient.id);
-              
-              // 새로운 레코드들을 개별적으로 추가
-              records.forEach((row, idx) => {
-                const newDrugAdministration = {
-                  id: `${Date.now()}_${idx}`,
-                  patientId: selectedPatient.id,
-                  drugName: tdmDrug.drugName,
-                  route: row.route,
-                  date: row.timeStr.split(" ")[0],
-                  time: row.timeStr.split(" ")[1],
-                  dose: Number(row.amount.split(" ")[0]),
-                  unit: row.amount.split(" ")[1] || "mg",
-                  isIVInfusion: row.route === "정맥",
-                  infusionTime: row.injectionTime && row.injectionTime !== "-" ? Number(row.injectionTime) : undefined,
-                  administrationTime: undefined
-                };
-                onAddDrugAdministration(newDrugAdministration);
-              });
-            }
-          }}
-        />
-        <div className="flex justify-between mt-6">
-          <Button variant="outline" type="button" onClick={onPrev} className="flex items-center gap-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200">
-            <ArrowLeft className="h-4 w-4" />
-            Lab
-          </Button>
-          <Button type="button" onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black dark:bg-blue-700 text-white font-bold text-lg py-3 px-6 justify-center dark:hover:bg-blue-800">
-            TDM Simulation
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" />
+            4단계: TDM 약물 투약력 입력
+            {isCompleted && <CheckCircle className="h-5 w-5 text-green-600" />}
+          </CardTitle>
+          <CardDescription>
+            2단계에서 입력한 TDM 약물에 대해 7반감기 이내의 투약력을 입력하세요.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="py-2 px-3 rounded bg-muted dark:bg-slate-800 text-base font-semibold mb-4">
+            약물명: {tdmDrug?.drugName || "-"}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white dark:bg-slate-900 border dark:border-slate-700 text-slate-900 dark:text-slate-200">
+        <CardHeader>
+          <CardTitle>투약 기록 입력</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* table_maker 테이블/입력 UI */}
+          <TablePage
+            tdmDrug={tdmDrug}
+            onComplete={onNext}
+            onTableGenerated={() => setTableReady(true)}
+            onSaveRecords={(records) => {
+              // records를 DrugAdministration 타입으로 변환하여 onAddDrugAdministration으로 추가
+              if (selectedPatient && tdmDrug) {
+                // 기존 투약 기록을 모두 삭제 (같은 환자의 기존 기록)
+                const filteredAdministrations = drugAdministrations.filter(d => d.patientId !== selectedPatient.id);
+                
+                // 새로운 레코드들을 개별적으로 추가
+                records.forEach((row, idx) => {
+                  const newDrugAdministration = {
+                    id: `${Date.now()}_${idx}`,
+                    patientId: selectedPatient.id,
+                    drugName: tdmDrug.drugName,
+                    route: row.route,
+                    date: row.timeStr.split(" ")[0],
+                    time: row.timeStr.split(" ")[1],
+                    dose: Number(row.amount.split(" ")[0]),
+                    unit: row.amount.split(" ")[1] || "mg",
+                    isIVInfusion: row.route === "정맥",
+                    infusionTime: row.injectionTime && row.injectionTime !== "-" ? Number(row.injectionTime) : undefined,
+                    administrationTime: undefined
+                  };
+                  onAddDrugAdministration(newDrugAdministration);
+                });
+              }
+            }}
+          />
+          <div className="flex justify-between mt-6">
+            <Button variant="outline" type="button" onClick={onPrev} className="flex items-center gap-2 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200">
+              <ArrowLeft className="h-4 w-4" />
+              Lab
+            </Button>
+            <Button onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black dark:bg-blue-700 text-white font-bold text-lg py-3 px-6 justify-center dark:hover:bg-blue-800">
+              TDM Simulation
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

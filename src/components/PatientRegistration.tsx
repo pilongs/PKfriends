@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Patient } from "@/pages/Index";
-import { UserPlus, Edit, Eye } from "lucide-react";
+import { UserPlus, Edit, Eye, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import dayjs from "dayjs";
 
 interface PatientRegistrationProps {
@@ -31,6 +32,7 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +62,7 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
       allergies: ""
     });
     setIsEditing(false);
+    setIsModalOpen(false);
   };
 
   const handleEdit = (patient: Patient) => {
@@ -76,6 +79,7 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
     });
     setSelectedPatient(patient);
     setIsEditing(true);
+    setIsModalOpen(true);
   };
 
   const resetForm = () => {
@@ -92,6 +96,7 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
     });
     setIsEditing(false);
     setSelectedPatient(null);
+    setIsModalOpen(false);
   };
 
   const handleBirthChange = (value: string) => {
@@ -121,128 +126,154 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
     return Math.sqrt((w * h) / 3600).toFixed(2);
   };
 
+  const openNewPatientModal = () => {
+    setIsEditing(false);
+    setSelectedPatient(null);
+    setFormData({
+      patientNo: "",
+      name: "",
+      gender: "",
+      birth: "",
+      age: "",
+      weight: "",
+      height: "",
+      medicalHistory: "",
+      allergies: ""
+    });
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Registration Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5" />
-              {isEditing ? "환자 정보 수정" : "신규 환자 등록"}
-            </CardTitle>
-            <CardDescription>
-              {isEditing ? "환자 정보를 수정합니다" : "환자 정보를 입력해 등록하세요"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      {/* New Patient Button */}
+      <div className="flex justify-end">
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={openNewPatientModal} className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              신규 환자 등록
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                {isEditing ? "환자 정보 수정" : "신규 환자 등록"}
+              </DialogTitle>
+              <DialogDescription>
+                {isEditing ? "환자 정보를 수정합니다" : "환자 정보를 입력해 등록하세요"}
+              </DialogDescription>
+            </DialogHeader>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="patientNo">환자 번호 *</Label>
-                  <Input
-                    id="patientNo"
-                    value={formData.patientNo}
-                    onChange={(e) => setFormData({...formData, patientNo: e.target.value})}
-                    placeholder="환자 번호 입력"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="name">이름 *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="이름 입력"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="gender">성별 *</Label>
-                  <Select
-                    value={formData.gender}
-                    onValueChange={(value) => setFormData({...formData, gender: value})}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="성별 선택" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">남성</SelectItem>
-                      <SelectItem value="female">여성</SelectItem>
-                      <SelectItem value="other">기타</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="birth">생년월일 *</Label>
-                  <Input
-                    id="birth"
-                    type="date"
-                    value={formData.birth}
-                    onChange={(e) => handleBirthChange(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="age">나이</Label>
-                  <Input
-                    id="age"
-                    value={formData.age}
-                    readOnly
-                    placeholder="생년월일 입력 시 자동 계산"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="weight">체중(kg) *</Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    step="0.1"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                    placeholder="체중(kg)"
-                    min="0"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="height">신장(cm) *</Label>
-                  <Input
-                    id="height"
-                    type="number"
-                    value={formData.height}
-                    onChange={(e) => setFormData({...formData, height: e.target.value})}
-                    placeholder="신장(cm)"
-                    min="0"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label>BMI</Label>
-                  <Input value={calcBMI()} readOnly placeholder="자동 계산" />
-                </div>
-                <div>
-                  <Label>BSA</Label>
-                  <Input value={calcBSA()} readOnly placeholder="자동 계산" />
-                </div>
-              </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="patientNo">환자 번호 *</Label>
+                      <Input
+                        id="patientNo"
+                        value={formData.patientNo}
+                        onChange={(e) => setFormData({...formData, patientNo: e.target.value})}
+                        placeholder="환자 번호 입력"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="name">이름 *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        placeholder="이름 입력"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="gender">성별 *</Label>
+                      <Select
+                        value={formData.gender}
+                        onValueChange={(value) => setFormData({...formData, gender: value})}
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="성별 선택" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">남성</SelectItem>
+                          <SelectItem value="female">여성</SelectItem>
+                          <SelectItem value="other">기타</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="birth">생년월일 *</Label>
+                      <Input
+                        id="birth"
+                        type="date"
+                        value={formData.birth}
+                        onChange={(e) => handleBirthChange(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="weight">체중(kg) *</Label>
+                      <Input
+                        id="weight"
+                        type="number"
+                        step="0.1"
+                        value={formData.weight}
+                        onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                        placeholder="체중(kg)"
+                        min="0"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="height">신장(cm) *</Label>
+                      <Input
+                        id="height"
+                        type="number"
+                        value={formData.height}
+                        onChange={(e) => setFormData({...formData, height: e.target.value})}
+                        placeholder="신장(cm)"
+                        min="0"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="age">나이</Label>
+                      <Input
+                        id="age"
+                        value={formData.age}
+                        readOnly
+                        placeholder="생년월일 입력 시 자동 계산"
+                      />
+                    </div>
+                    <div>
+                      <Label>BMI</Label>
+                      <Input value={calcBMI()} readOnly placeholder="자동 계산" />
+                    </div>
+                    <div>
+                      <Label>BSA</Label>
+                      <Input value={calcBSA()} readOnly placeholder="자동 계산" />
+                    </div>
+                  </div>
 
-              <div className="flex gap-2">
+
+
+              <div className="flex gap-2 pt-4">
                 <Button type="submit" className="flex-1">
                   {isEditing ? "수정하기" : "등록하기"}
                 </Button>
-                {isEditing && (
-                  <Button type="button" variant="outline" onClick={resetForm}>
-                    취소
-                  </Button>
-                )}
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  취소
+                </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </DialogContent>
+        </Dialog>
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Patient Details */}
         {selectedPatient && (
           <Card>
@@ -356,7 +387,7 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground">아직 등록된 환자가 없습니다</p>
-              <p className="text-sm text-muted-foreground">위 폼을 통해 첫 환자를 등록하세요</p>
+              <p className="text-sm text-muted-foreground">위 버튼을 통해 첫 환자를 등록하세요</p>
             </div>
           )}
         </CardContent>

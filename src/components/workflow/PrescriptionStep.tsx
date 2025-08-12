@@ -19,14 +19,26 @@ interface PrescriptionStepProps {
 }
 
 const TDM_DRUGS = [
-  { name: "클로자핀", indications: ["조현병", "양극성 장애"], targets: [
-    { type: "Trough Concentration", value: "350-600 ng/mL" },
-    { type: "Peak Concentration", value: "600-1000 ng/mL" }
-  ] },
-  { name: "디곡신", indications: ["심부전", "심방세동"], targets: [
-    { type: "Trough Concentration", value: "0.8-2.0 ng/mL" }
-  ] },
-  // 필요시 추가
+  { 
+    name: "Vancomycin", 
+    indications: ["패혈증(Sepsis)", "심내막염", "뼈관절감염", "폐렴", "복막염"], 
+    additionalInfo: ["신기능", "체중", "나이", "감염 부위", "미생물 민감도"],
+    targets: [
+      { type: "Trough Concentration", value: "10-20 mg/L" },
+      { type: "Peak Concentration", value: "25-40 mg/L" },
+      { type: "AUC24", value: "400-600 mg·h/L" }
+    ] 
+  },
+  { 
+    name: "Cyclosporin", 
+    indications: ["장기이식", "자가면역질환", "건선", "류마티스관절염"], 
+    additionalInfo: ["신기능", "간기능", "혈압", "약물상호작용", "이식 후 경과"],
+    targets: [
+      { type: "Trough Concentration", value: "100-400 ng/mL" },
+      { type: "Peak Concentration", value: "800-1200 ng/mL" },
+      { type: "C2 Concentration", value: "1200-1700 ng/mL" }
+    ] 
+  }
 ];
 
 const PrescriptionStep = ({
@@ -41,6 +53,7 @@ const PrescriptionStep = ({
   const [formData, setFormData] = useState({
     drugName: "",
     indication: "",
+    additionalInfo: "",
     tdmTarget: "",
     tdmTargetValue: ""
   });
@@ -52,14 +65,16 @@ const PrescriptionStep = ({
 
   const selectedDrug = TDM_DRUGS.find(d => d.name === formData.drugName);
   const tdmTargets = selectedDrug ? selectedDrug.targets : [];
+  const additionalInfoOptions = selectedDrug ? selectedDrug.additionalInfo : [];
 
   const handleDrugChange = (value: string) => {
     const drug = TDM_DRUGS.find(d => d.name === value);
     setFormData({
       drugName: value,
-      indication: drug?.indications[0] || "",
-      tdmTarget: drug?.targets[0]?.type || "",
-      tdmTargetValue: drug?.targets[0]?.value || ""
+      indication: drug?.name === "Vancomycin" ? "패혈증(Sepsis)" : drug?.indications[0] || "",
+      additionalInfo: "",
+      tdmTarget: "Trough Concentration",
+      tdmTargetValue: drug?.targets.find(t => t.type === "Trough Concentration")?.value || ""
     });
   };
 
@@ -94,6 +109,7 @@ const PrescriptionStep = ({
     setFormData({
       drugName: "",
       indication: "",
+      additionalInfo: "",
       tdmTarget: "",
       tdmTargetValue: ""
     });
@@ -145,6 +161,7 @@ const PrescriptionStep = ({
                       <TableRow>
                         <TableHead>약물명</TableHead>
                         <TableHead>적응증</TableHead>
+                        <TableHead>추가정보</TableHead>
                         <TableHead>TDM 목표</TableHead>
                         <TableHead>TDM 목표치</TableHead>
                         <TableHead>삭제</TableHead>
@@ -155,6 +172,7 @@ const PrescriptionStep = ({
                         <TableRow key={currentPrescription.id}>
                           <TableCell className="font-medium">{currentPrescription.drugName}</TableCell>
                           <TableCell>{currentPrescription.indication || "-"}</TableCell>
+                          <TableCell>{formData.additionalInfo || "-"}</TableCell>
                           <TableCell>{currentPrescription.tdmTarget || "-"}</TableCell>
                           <TableCell>{currentPrescription.tdmTargetValue || "-"}</TableCell>
                           <TableCell>
@@ -199,8 +217,30 @@ const PrescriptionStep = ({
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="indication">적응증 (선택)</Label>
-                    <Input id="indication" value={formData.indication} readOnly placeholder="약물 선택 시 자동 표시" />
+                    <Label htmlFor="indication">적응증 *</Label>
+                    <Select value={formData.indication} onValueChange={(value) => setFormData(prev => ({ ...prev, indication: value }))} required disabled={!formData.drugName}>
+                      <SelectTrigger id="indication">
+                        <SelectValue placeholder="적응증 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedDrug?.indications.map(indication => (
+                          <SelectItem key={indication} value={indication}>{indication}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="additionalInfo">추가정보</Label>
+                    <Select value={formData.additionalInfo} onValueChange={(value) => setFormData(prev => ({ ...prev, additionalInfo: value }))} disabled={!formData.drugName}>
+                      <SelectTrigger id="additionalInfo">
+                        <SelectValue placeholder="추가정보 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {additionalInfoOptions.map(info => (
+                          <SelectItem key={info} value={info}>{info}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="tdmTarget">TDM 목표 *</Label>
