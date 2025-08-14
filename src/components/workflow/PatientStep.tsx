@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Patient } from "@/pages/Index";
-import { User, UserPlus, ArrowRight, CheckCircle } from "lucide-react";
+import { User, UserPlus, ArrowRight, CheckCircle, Edit, Eye, EyeOff } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import dayjs from "dayjs";
 
@@ -16,6 +16,7 @@ interface PatientStepProps {
   selectedPatient: Patient | null;
   setSelectedPatient: (patient: Patient | null) => void;
   onAddPatient: (patient: Patient) => void;
+  onUpdatePatient: (patient: Patient) => void;
   onNext: () => void;
   isCompleted: boolean;
 }
@@ -25,10 +26,13 @@ const PatientStep = ({
   selectedPatient,
   setSelectedPatient,
   onAddPatient,
+  onUpdatePatient,
   onNext,
   isCompleted
 }: PatientStepProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
   const [newPatientData, setNewPatientData] = useState({
     patientNo: "",
     name: "",
@@ -54,7 +58,9 @@ const PatientStep = ({
       gender: newPatientData.gender,
       medicalHistory: newPatientData.medicalHistory,
       allergies: newPatientData.allergies,
-      createdAt: newPatientData.birth ? new Date(newPatientData.birth) : new Date()
+      birth: newPatientData.birth,
+      createdAt: new Date(),
+      hasReport: false
     };
 
     onAddPatient(newPatient);
@@ -123,6 +129,44 @@ const PatientStep = ({
     setIsModalOpen(true);
   };
 
+  const openEditPatientModal = (patient: Patient) => {
+    setEditingPatient(patient);
+    setNewPatientData({
+      patientNo: patient.id,
+      name: patient.name,
+      birth: patient.birth || "",
+      age: patient.age.toString(),
+      weight: patient.weight.toString(),
+      height: patient.height.toString(),
+      gender: patient.gender,
+      medicalHistory: patient.medicalHistory || "",
+      allergies: patient.allergies || ""
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditPatientSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPatient) return;
+    
+    const updatedPatient: Patient = {
+      ...editingPatient,
+      name: newPatientData.name,
+      age: parseInt(newPatientData.age),
+      weight: parseFloat(newPatientData.weight),
+      height: parseFloat(newPatientData.height),
+      gender: newPatientData.gender,
+      medicalHistory: newPatientData.medicalHistory,
+      allergies: newPatientData.allergies,
+      birth: newPatientData.birth
+    };
+
+    // 환자 목록 업데이트
+    onUpdatePatient(updatedPatient);
+    setIsEditModalOpen(false);
+    setEditingPatient(null);
+  };
+
   return (
     <div className="space-y-6">
       {/* Step 1: Patient Selection */}
@@ -147,19 +191,21 @@ const PatientStep = ({
                 placeholder="이름 또는 환자번호 입력"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="mb-2"
+                className="mb-6"
               />
-              <Label>기존 환자 리스트</Label>
+              <Label className="mb-4 block">기존 환자 리스트</Label>
               <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>이름</TableHead>
                       <TableHead>환자번호</TableHead>
-                      <TableHead>나이</TableHead>
+                      <TableHead>생년월일(나이)</TableHead>
                       <TableHead>성별</TableHead>
-                      <TableHead>체중(kg)</TableHead>
-                      <TableHead>신장(cm)</TableHead>
+                      <TableHead>체중(BMI)</TableHead>
+                      <TableHead>최신 분석일</TableHead>
+                      <TableHead>등록일</TableHead>
+                      <TableHead>수정 및 조회</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -172,22 +218,62 @@ const PatientStep = ({
                               ? "bg-blue-100 cursor-pointer"
                               : "hover:bg-muted/50 cursor-pointer"
                           }
+                          data-state={selectedPatient?.id === patient.id ? "selected" : undefined}
                           onClick={() => {
+                            console.log('환자 선택됨:', patient);
                             setSelectedPatient(patient);
                           }}
-                          data-state={selectedPatient?.id === patient.id ? "selected" : undefined}
                         >
-                          <TableCell>{patient.name}</TableCell>
+                          <TableCell className="cursor-pointer">
+                            {patient.name}
+                          </TableCell>
                           <TableCell>{patient.id}</TableCell>
-                          <TableCell>{patient.age}</TableCell>
+                          <TableCell>
+                            {patient.birth ? dayjs(patient.birth).format('YYYY-MM-DD') : '-'} ({patient.age}세)
+                          </TableCell>
                           <TableCell>{patient.gender === "male" ? "남" : patient.gender === "female" ? "여" : "-"}</TableCell>
-                          <TableCell>{patient.weight}</TableCell>
-                          <TableCell>{patient.height}</TableCell>
+                          <TableCell>
+                            {patient.weight}kg (BMI: {patient.weight && patient.height ? (patient.weight / Math.pow(patient.height / 100, 2)).toFixed(1) : '-'})
+                          </TableCell>
+                          <TableCell>
+                            {patient.lastAnalysisDate ? dayjs(patient.lastAnalysisDate).format('YYYY-MM-DD') : '-'}
+                          </TableCell>
+                          <TableCell>{dayjs(patient.createdAt).format('YYYY-MM-DD')}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditPatientModal(patient);
+                                }}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant={patient.hasReport ? "outline" : "outline"}
+                                size="sm"
+                                disabled={!patient.hasReport}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (patient.hasReport) {
+                                    // TODO: 리포트 상세 화면으로 이동
+                                    console.log('리포트 조회:', patient.id);
+                                  }
+                                }}
+                                className={`h-8 w-8 p-0 ${!patient.hasReport ? 'opacity-50' : ''}`}
+                              >
+                                {patient.hasReport ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground">검색 결과가 없습니다.</TableCell>
+                        <TableCell colSpan={8} className="text-center text-muted-foreground">검색 결과가 없습니다.</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -342,6 +428,131 @@ const PatientStep = ({
             </Dialog>
           </div>
 
+          {/* 환자 정보 수정 모달 */}
+          <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5" />
+                  환자 정보 수정
+                </DialogTitle>
+                <DialogDescription>
+                  환자 정보를 수정하세요
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={handleEditPatientSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editPatientNo">환자 번호</Label>
+                    <Input
+                      id="editPatientNo"
+                      value={newPatientData.patientNo}
+                      readOnly
+                      className="bg-gray-100"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editName">이름 *</Label>
+                    <Input
+                      id="editName"
+                      value={newPatientData.name}
+                      onChange={(e) => setNewPatientData({...newPatientData, name: e.target.value})}
+                      placeholder="이름 입력"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editGender">성별 *</Label>
+                    <Select
+                      value={newPatientData.gender}
+                      onValueChange={(value) => setNewPatientData({...newPatientData, gender: value})}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="성별 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">남성</SelectItem>
+                        <SelectItem value="female">여성</SelectItem>
+                        <SelectItem value="other">기타</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editBirth">생년월일 *</Label>
+                    <Input
+                      id="editBirth"
+                      type="date"
+                      value={newPatientData.birth}
+                      onChange={(e) => {
+                        if (e.target.value.length > 10) return;
+                        handleBirthChange(e.target.value);
+                      }}
+                      required
+                      max={dayjs().format('YYYY-MM-DD')}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editWeight">체중(kg) *</Label>
+                    <Input
+                      id="editWeight"
+                      type="number"
+                      step="0.1"
+                      value={newPatientData.weight}
+                      onChange={(e) => setNewPatientData({...newPatientData, weight: e.target.value})}
+                      placeholder="체중(kg)"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editHeight">신장(cm) *</Label>
+                    <Input
+                      id="editHeight"
+                      type="number"
+                      value={newPatientData.height}
+                      onChange={(e) => setNewPatientData({...newPatientData, height: e.target.value})}
+                      placeholder="신장(cm)"
+                      min="0"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editAge">나이</Label>
+                    <Input
+                      id="editAge"
+                      value={newPatientData.age}
+                      readOnly
+                      placeholder="생년월일 입력 시 자동 계산"
+                    />
+                  </div>
+                  <div>
+                    <Label>BMI</Label>
+                    <Input value={calcBMI()} readOnly placeholder="자동 계산" />
+                  </div>
+                  <div>
+                    <Label>BSA</Label>
+                    <Input value={calcBSA()} readOnly placeholder="자동 계산" />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button type="submit" className="flex-1">
+                    수정 완료
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsEditModalOpen(false)}
+                  >
+                    취소
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
           {/* Selected Patient Info */}
           {selectedPatient && (
             <Card className="border-green-200 bg-green-50">
@@ -356,7 +567,7 @@ const PatientStep = ({
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">생년월일</Label>
-                    <p className="text-sm">{selectedPatient.createdAt.toLocaleDateString()}</p>
+                    <p className="text-sm">{selectedPatient.birth ? dayjs(selectedPatient.birth).format('YYYY-MM-DD') : '-'}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">나이</Label>

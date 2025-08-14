@@ -27,6 +27,9 @@ export interface Patient {
   medicalHistory: string;
   allergies: string;
   createdAt: Date;
+  birth: string; // 생년월일 추가
+  lastAnalysisDate?: Date; // 최신 분석일 추가
+  hasReport?: boolean; // 리포트 존재 여부 추가
 }
 
 export interface Prescription {
@@ -82,6 +85,56 @@ const Index = ({ onLogout }: IndexProps) => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [isDark, setIsDark] = useState(false);
 
+  // 샘플 환자 데이터 추가
+  useEffect(() => {
+    if (patients.length === 0) {
+      const samplePatients: Patient[] = [
+        {
+          id: "P001",
+          name: "김철수",
+          age: 45,
+          weight: 70,
+          height: 175,
+          gender: "male",
+          medicalHistory: "고혈압",
+          allergies: "페니실린",
+          birth: "1978-05-15",
+          createdAt: new Date("2024-01-15"),
+          lastAnalysisDate: new Date("2024-12-01"),
+          hasReport: true
+        },
+        {
+          id: "P002",
+          name: "이영희",
+          age: 32,
+          weight: 55,
+          height: 160,
+          gender: "female",
+          medicalHistory: "당뇨병",
+          allergies: "없음",
+          birth: "1991-08-22",
+          createdAt: new Date("2024-02-20"),
+          lastAnalysisDate: new Date("2024-11-15"),
+          hasReport: true
+        },
+        {
+          id: "P003",
+          name: "박민수",
+          age: 58,
+          weight: 80,
+          height: 180,
+          gender: "male",
+          medicalHistory: "심장질환",
+          allergies: "아스피린",
+          birth: "1965-12-03",
+          createdAt: new Date("2024-03-10"),
+          hasReport: false
+        }
+      ];
+      setPatients(samplePatients);
+    }
+  }, [patients.length]);
+
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDark) {
@@ -93,6 +146,10 @@ const Index = ({ onLogout }: IndexProps) => {
 
   const addPatient = (patient: Patient) => {
     setPatients([...patients, patient]);
+  };
+
+  const updatePatient = (updatedPatient: Patient) => {
+    setPatients(patients.map(p => p.id === updatedPatient.id ? updatedPatient : p));
   };
 
   const addPrescription = (prescription: Prescription) => {
@@ -197,6 +254,7 @@ const Index = ({ onLogout }: IndexProps) => {
               selectedPatient={selectedPatient}
               setSelectedPatient={setSelectedPatient}
               onAddPatient={addPatient}
+              onUpdatePatient={updatePatient}
               onAddPrescription={addPrescription}
               onAddBloodTest={addBloodTest}
               onAddDrugAdministration={addDrugAdministration}

@@ -163,7 +163,7 @@ const BloodTestStep = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FlaskConical className="h-5 w-5" />
-            Lab
+            3단계: Lab
             {isCompleted && <CheckCircle className="h-5 w-5 text-green-600" />}
           </CardTitle>
           <CardDescription>
@@ -184,14 +184,14 @@ const BloodTestStep = ({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-16">분석사용</TableHead>
-                      <TableHead>혈청 크레아티닌(mg/dL)</TableHead>
+                      <TableHead className="w-24">분석사용</TableHead>
+                      <TableHead className="w-32">혈청 크레아티닌</TableHead>
                       <TableHead>검사일</TableHead>
                       <TableHead>계산식</TableHead>
                       <TableHead>결과</TableHead>
                       <TableHead>투석 여부</TableHead>
                       <TableHead>신 대체요법</TableHead>
-                      <TableHead className="w-16">삭제</TableHead>
+                      <TableHead className="w-20">삭제</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -343,7 +343,7 @@ const BloodTestStep = ({
                     id="drugDateTime"
                     type="text"
                     value={formData.testDate}
-                    placeholder="예: 2025-07-25 14:00 또는 202507251400"
+                    placeholder="예: 202507251400"
                     onChange={e => setFormData({ ...formData, testDate: e.target.value })}
                     max={today + ' 23:59'}
                   />

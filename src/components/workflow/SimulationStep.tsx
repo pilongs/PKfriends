@@ -41,11 +41,11 @@ const SimulationStep = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Step 4: PK Simulation & Analysis
+            TDM 분석 및 시뮬레이션 단계
             <CheckCircle className="h-5 w-5 text-green-600" />
           </CardTitle>
           <CardDescription>
-            Pharmacokinetic analysis and simulation for {selectedPatient.name}
+          {selectedPatient.name}님의 TDM 결과를 확인하고 약물요법을 직접 조정해볼 수 있습니다.
           </CardDescription>
         </CardHeader>
         <CardContent>

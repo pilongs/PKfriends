@@ -104,9 +104,6 @@ const DrugAdministrationStep = ({
       </Card>
 
       <Card className="bg-white dark:bg-slate-900 border dark:border-slate-700 text-slate-900 dark:text-slate-200">
-        <CardHeader>
-          <CardTitle>투약 기록 입력</CardTitle>
-        </CardHeader>
         <CardContent>
           {/* table_maker 테이블/입력 UI */}
           <TablePage
@@ -144,10 +141,15 @@ const DrugAdministrationStep = ({
               <ArrowLeft className="h-4 w-4" />
               Lab
             </Button>
-            <Button onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black dark:bg-blue-700 text-white font-bold text-lg py-3 px-6 justify-center dark:hover:bg-blue-800">
-              TDM Simulation
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+            <div className="flex gap-4">
+              <Button type="button" className="flex items-center gap-2 bg-black text-white hover:bg-gray-800">
+                임시저장
+              </Button>
+              <Button onClick={onNext} className="flex items-center gap-2 w-[300px] bg-black dark:bg-blue-700 text-white font-bold text-lg py-3 px-6 justify-center dark:hover:bg-blue-800">
+                TDM Simulation
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

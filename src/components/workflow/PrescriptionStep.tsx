@@ -157,24 +157,24 @@ const PrescriptionStep = ({
               <CardContent>
                 <div className="rounded-md border">
                   <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>약물명</TableHead>
-                        <TableHead>적응증</TableHead>
-                        <TableHead>추가정보</TableHead>
-                        <TableHead>TDM 목표</TableHead>
-                        <TableHead>TDM 목표치</TableHead>
-                        <TableHead>삭제</TableHead>
-                      </TableRow>
-                    </TableHeader>
+                                      <TableHeader>
+                    <TableRow>
+                      <TableHead>약물명</TableHead>
+                      <TableHead>적응증</TableHead>
+                      <TableHead>TDM 목표</TableHead>
+                      <TableHead>TDM 목표치</TableHead>
+                      <TableHead>추가정보</TableHead>
+                      <TableHead>삭제</TableHead>
+                    </TableRow>
+                  </TableHeader>
                     <TableBody>
                       {currentPrescription && (
                         <TableRow key={currentPrescription.id}>
                           <TableCell className="font-medium">{currentPrescription.drugName}</TableCell>
                           <TableCell>{currentPrescription.indication || "-"}</TableCell>
-                          <TableCell>{formData.additionalInfo || "-"}</TableCell>
                           <TableCell>{currentPrescription.tdmTarget || "-"}</TableCell>
                           <TableCell>{currentPrescription.tdmTargetValue || "-"}</TableCell>
+                          <TableCell>{formData.additionalInfo || "-"}</TableCell>
                           <TableCell>
                             <Button variant="ghost" size="icon" onClick={() => handleDelete(currentPrescription.id)}>
                               <span className="sr-only">삭제</span>

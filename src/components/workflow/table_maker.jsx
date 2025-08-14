@@ -363,26 +363,27 @@ function TablePage(props) {
       style={{
         padding: "0",
         fontFamily: "Arial, sans-serif",
-        background: isDarkMode ? "#181e29" : "#f4f6fa",
+        background: isDarkMode ? "#181e29" : "#ffffff",
         color: isDarkMode ? "#e0e6f0" : "#333",
         minHeight: "100vh"
       }}
     >
       <div style={{ width: "100%", margin: 0, padding: "0 0 40px 0" }}>
         <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-          <h1 style={{ textAlign: "center", color: isDarkMode ? "#e0e6f0" : "#333", marginBottom: "30px" }}>
-            투약 기록 테이블 생성기
-          </h1>
-          {/* 이하 기존 테이블 입력 UI 코드 유지 */}
-          {/* 1단계: 개선된 조건 입력 UI */}
-          <div style={{
-            background: isDarkMode ? "#23293a" : "#f8f9fa",
-            padding: "20px",
-            borderRadius: "8px",
-            marginBottom: "30px",
-            border: isDarkMode ? "1px solid #334155" : "1px solid #dee2e6"
-          }}>
-            <h2 style={{ marginBottom: 20, color: isDarkMode ? "#e0e6f0" : "#495057" }}>1단계: 투약 조건 입력</h2>
+          
+                     {/* 이하 기존 테이블 입력 UI 코드 유지 */}
+           {/* 1단계: 개선된 조건 입력 UI */}
+           <div style={{
+             background: isDarkMode ? "#23293a" : "#ffffff",
+             padding: "20px",
+             borderRadius: "8px",
+             marginBottom: "30px",
+             border: isDarkMode ? "1px solid #334155" : "1px solid #dee2e6"
+           }}>
+             <h2 style={{ marginBottom: 20, color: isDarkMode ? "#e0e6f0" : "#495057", fontSize: "18px", fontWeight: "600" }}>
+               1단계 : 투약 기록 입력
+             </h2>
+
 
                        {/* 현재 조건 입력 박스 */}
             <div style={{
@@ -570,24 +571,24 @@ function TablePage(props) {
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
                 <button
                   onClick={addOrUpdateCondition}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#eaf0fd",
-                    border: "none",
-                    color: "#1B44C8",
-                    fontWeight: 600,
-                    fontSize: 16,
-                    cursor: "pointer",
-                    padding: "8px 32px",
-                    margin: 0,
-                    outline: "none",
-                    borderRadius: "12px",
-                    transition: "background 0.2s, color 0.2s"
-                  }}
-                  onMouseOver={e => { e.target.style.backgroundColor = "#dbeafe"; }}
-                  onMouseOut={e => { e.target.style.backgroundColor = "#eaf0fd"; }}
+                                     style={{
+                     display: "flex",
+                     alignItems: "center",
+                     justifyContent: "center",
+                     background: isEditMode ? "#1B44C8" : "#000000",
+                     border: "none",
+                     color: "#ffffff",
+                     fontWeight: 600,
+                     fontSize: 14,
+                     cursor: "pointer",
+                     padding: "8px 32px",
+                     margin: 0,
+                     outline: "none",
+                     borderRadius: "5px",
+                     transition: "background 0.2s, color 0.2s"
+                   }}
+                  onMouseOver={e => { e.target.style.backgroundColor = isEditMode ? "#0f3a8f" : "#333333"; }}
+                  onMouseOut={e => { e.target.style.backgroundColor = isEditMode ? "#1B44C8" : "#000000"; }}
                 >
                   <span style={{ fontSize: 20, marginRight: 6, fontWeight: 600, background: "transparent" }}>
                     {isEditMode ? "✓" : "+"}
@@ -635,7 +636,7 @@ function TablePage(props) {
                       <button
                         onClick={() => startEditCondition(condition.id)}
                         style={{
-                          padding: "4px 8px",
+                          padding: "10px",
                           backgroundColor: "#17a2b8",
                           color: "white",
                           border: "none",
@@ -649,7 +650,7 @@ function TablePage(props) {
                       <button
                         onClick={() => removeCondition(condition.id)}
                         style={{
-                          padding: "4px 8px",
+                          padding: "10px",
                           backgroundColor: "#dc3545",
                           color: "white",
                           border: "none",
@@ -670,34 +671,34 @@ function TablePage(props) {
             <button
               onClick={generateTable}
               disabled={conditions.length === 0}
-              style={{
-                width: "100%",
-                padding: "10px 0",
-                backgroundColor: isDarkMode ? (conditions.length === 0 ? "#334155" : "#1B44C8") : "#fff",
-                color: isDarkMode ? "#fff" : "#1B44C8",
-                border: isDarkMode ? "2px solid #1B44C8" : "2px solid #1B44C8",
-                borderRadius: "12px",
-                fontSize: 18,
-                fontWeight: 700,
-                cursor: conditions.length === 0 ? "not-allowed" : "pointer",
-                marginTop: "20px",
-                transition: "background 0.2s, color 0.2s"
-              }}
+                             style={{
+                 width: "100%",
+                 padding: "10px 0",
+                 backgroundColor: isDarkMode ? (conditions.length === 0 ? "#334155" : "#000000") : "#000000",
+                 color: "#ffffff",
+                 border: "none",
+                 borderRadius: "5px",
+                 fontSize: 14,
+                 fontWeight: 700,
+                 cursor: conditions.length === 0 ? "not-allowed" : "pointer",
+                 marginTop: "20px",
+                 transition: "background 0.2s, color 0.2s"
+               }}
               onMouseOver={e => {
                 if (conditions.length > 0) {
                   if (isDarkMode) {
-                    e.target.style.backgroundColor = "#274fcf";
+                    e.target.style.backgroundColor = "#333333";
                   } else {
-                    e.target.style.backgroundColor = "#eaf0fd";
+                    e.target.style.backgroundColor = "#333333";
                   }
                 }
               }}
               onMouseOut={e => {
                 if (conditions.length > 0) {
                   if (isDarkMode) {
-                    e.target.style.backgroundColor = "#1B44C8";
+                    e.target.style.backgroundColor = "#000000";
                   } else {
-                    e.target.style.backgroundColor = "#fff";
+                    e.target.style.backgroundColor = "#000000";
                   }
                 }
               }}
@@ -714,8 +715,7 @@ function TablePage(props) {
               borderRadius: "8px",
               border: isDarkMode ? "1px solid #334155" : "1px solid #dee2e6"
             }}>
-              <h2 style={{ marginBottom:20, color: isDarkMode ? '#e0e6f0' : '#495057' }}>2단계 : 투약 기록 확인</h2>
-              
+          <h2 style={{ marginBottom:20, color: isDarkMode ? '#e0e6f0' : '#495057', fontSize: "18px", fontWeight: "600" }}>2단계 : 투약 기록 확인</h2>
               <div style={{ overflowX: "auto" }}>
                 <table style={{
                   width: "100%",
