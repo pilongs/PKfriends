@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Patient } from "@/pages/Index";
-import { UserPlus, Edit, Eye, X } from "lucide-react";
+import { UserPlus, Edit, Eye, X, Trash2, FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import dayjs from "dayjs";
@@ -33,6 +33,8 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
 
   const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewingPatient, setViewingPatient] = useState<Patient | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +48,7 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
       gender: formData.gender,
       medicalHistory: formData.medicalHistory,
       allergies: formData.allergies,
+      birth: formData.birth,
       createdAt: new Date()
     };
 
@@ -81,6 +84,10 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
     setIsEditing(true);
     setIsModalOpen(true);
   };
+  const handleView = (patient: Patient) => {
+    setViewingPatient(patient);
+    setIsViewModalOpen(true);
+  };
 
   const resetForm = () => {
     setFormData({
@@ -98,7 +105,15 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
     setSelectedPatient(null);
     setIsModalOpen(false);
   };
-
+  const handleDelete = () => {
+    if (selectedPatient) {
+    // onAddPatient는 새 환자를 추가하는 기능이지만,
+    // onAddPatient가 부모 컴포넌트의 setState를 호출할 가능성이 높으므로
+    // onAddPatient를 재활용하여 삭제 로직을 실행합니다.
+      onAddPatient(null);
+    }
+    resetForm();
+  };
   const handleBirthChange = (value: string) => {
     setFormData((prev) => {
       let age = "";
@@ -261,6 +276,11 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
 
 
               <div className="flex gap-2 pt-4">
+                {isEditing && (
+                   <Button type="button" variant="destructive" onClick={handleDelete} className="w-fit p-2">
+                     <Trash2 className="h-4 w-4" />
+                   </Button>
+                )}
                 <Button type="submit" className="flex-1">
                   {isEditing ? "수정하기" : "등록하기"}
                 </Button>
@@ -272,67 +292,81 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
           </DialogContent>
         </Dialog>
       </div>
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+    {/* 환자의 TDM 보고서가 생성된 경우에만 노출출*/}
+  <DialogContent className="min-w-[900px]">
+    <DialogHeader>
+      <DialogTitle>환자 정보 조회</DialogTitle>
+      <DialogDescription>
+        환자의 상세 정보를 확인합니다.
+      </DialogDescription>
+    </DialogHeader>
+    {viewingPatient && (
+      <div className="space-y-4">
+        {/* 첫 번째 행 */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>환자 이름</Label>
+            <p className="text-lg font-medium">{viewingPatient.name}</p>
+          </div>
+          <div>
+            <Label>환자 번호</Label>
+            <p className="text-lg font-medium">{viewingPatient.id}</p>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Patient Details */}
-        {selectedPatient && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                환자 정보
-              </CardTitle>
-              <CardDescription>
-                {selectedPatient && `${selectedPatient.name}의 상세 정보`}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">이름</Label>
-                    <p className="text-sm">{selectedPatient.name}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">나이</Label>
-                    <p className="text-sm">{selectedPatient.age} years</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">체중</Label>
-                    <p className="text-sm">{selectedPatient.weight} kg</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">신장</Label>
-                    <p className="text-sm">{selectedPatient.height} cm</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">성별</Label>
-                    <p className="text-sm capitalize">{selectedPatient.gender}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium text-muted-foreground">BMI</Label>
-                    <p className="text-sm">
-                      {(selectedPatient.weight / Math.pow(selectedPatient.height / 100, 2)).toFixed(1)}
-                    </p>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label className="text-sm font-medium text-muted-foreground">등록일</Label>
-                  <p className="text-sm">{selectedPatient.createdAt.toLocaleDateString()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* 두 번째 행 */}
+        <div className="flex justify-end">
+          <Button variant="outline">Report Download</Button>
+        </div>
+
+        {/* 세 번째 행 */}
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <Label>나이</Label>
+            <p>{viewingPatient.age}</p>
+          </div>
+          <div>
+            <Label>생년월일</Label>
+            <p>{viewingPatient.birth}</p>
+          </div>
+          <div>
+            <Label>성별</Label>
+            <p className="capitalize">{viewingPatient.gender}</p>
+          </div>
+          <div>
+            <Label>키 (cm)</Label>
+            <p>{viewingPatient.height}</p>
+          </div>
+          <div>
+            <Label>몸무게 (kg)</Label>
+            <p>{viewingPatient.weight}</p>
+          </div>
+          <div>
+            <Label>BMI</Label>
+            <p>{(viewingPatient.weight / Math.pow(viewingPatient.height / 100, 2)).toFixed(1)}</p>
+          </div>
+          <div>
+            <Label>BSA</Label>
+            <p>{Math.sqrt((viewingPatient.weight * viewingPatient.height) / 3600).toFixed(2)}</p>
+          </div>
+        </div>
+        
+        {/* 네 번째 행 */}
+        <div className="mt-8">
+          <p className="font-semibold text-lg">시뮬레이션 리포트</p>
+        </div>
       </div>
+    )}
+  </DialogContent>
+</Dialog>
 
-      {/* Patient List */}
+        {/* Patient List */}
       <Card>
         <CardHeader>
           <CardTitle>등록된 환자 ({patients.length})</CardTitle>
           <CardDescription>
-            환자를 클릭하면 상세 정보 확인 및 수정이 가능합니다
+            환자 정보를 확인하고 수정할 수 있습니다
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -342,12 +376,12 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
                 <TableHeader>
                   <TableRow>
                     <TableHead>이름</TableHead>
-                    <TableHead>나이</TableHead>
+                    <TableHead>환자번호</TableHead>
+                    <TableHead>나이(생년월일)</TableHead>
                     <TableHead>성별</TableHead>
-                    <TableHead>체중</TableHead>
-                    <TableHead>BMI</TableHead>
-                    <TableHead>등록일</TableHead>
-                    <TableHead>수정</TableHead>
+                    <TableHead>체중 (BMI)</TableHead>
+                    <TableHead>환자 등록일</TableHead>
+                    <TableHead>수정 및 조회</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -360,25 +394,35 @@ const PatientRegistration = ({ onAddPatient, patients, selectedPatient, setSelec
                       onClick={() => setSelectedPatient(patient)}
                     >
                       <TableCell className="font-medium">{patient.name}</TableCell>
-                      <TableCell>{patient.age}</TableCell>
+                      <TableCell>{patient.id}</TableCell>
+                      <TableCell>{patient.age}({patient.birth})</TableCell>
                       <TableCell className="capitalize">{patient.gender}</TableCell>
-                      <TableCell>{patient.weight} kg</TableCell>
-                      <TableCell>
-                        {(patient.weight / Math.pow(patient.height / 100, 2)).toFixed(1)}
-                      </TableCell>
+                      <TableCell>{patient.weight} kg ({(patient.weight / Math.pow(patient.height / 100, 2)).toFixed(1)})</TableCell>
                       <TableCell>{patient.createdAt.toLocaleDateString()}</TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(patient);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+    <div className="flex gap-2">
+        <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(patient);
+            }}
+        >
+            <Edit className="h-4 w-4" />
+        </Button>
+        <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+                e.stopPropagation();
+                handleView(patient);
+            }}
+        >
+            <FileText className="h-4 w-4" />
+        </Button>
+    </div>
+</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
