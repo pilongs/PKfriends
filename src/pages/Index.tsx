@@ -26,6 +26,7 @@ export interface Patient {
   gender: string;
   medicalHistory: string;
   allergies: string;
+  birth: string; // YYYY-MM-DD format
   createdAt: Date;
 }
 
